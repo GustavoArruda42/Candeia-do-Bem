@@ -1,0 +1,110 @@
+.pagina { display: flex; flex-direction: column; gap: 28px; max-width: 700px; }
+
+.cabecalho h1 { font-size: 1.8rem; margin-bottom: 6px; }
+.cabecalho p { color: var(--cor-texto-sub); font-size: 0.95rem; }
+
+.form {
+  background: var(--cor-branco);
+  border-radius: var(--radius-md);
+  padding: 32px;
+  box-shadow: var(--sombra-sm);
+  border: 1px solid var(--cor-borda);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.campo label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--cor-marrom);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.opcional {
+  font-weight: 400;
+  text-transform: none;
+  color: var(--cor-texto-sub);
+  letter-spacing: 0;
+}
+
+.campo input,
+.campo textarea {
+  padding: 11px 14px;
+  border: 1.5px solid var(--cor-borda);
+  border-radius: var(--radius-sm);
+  background: var(--cor-creme);
+  color: var(--cor-texto);
+  transition: border-color 0.18s;
+  resize: vertical;
+}
+
+.campo input:focus,
+.campo textarea:focus {
+  border-color: var(--cor-laranja);
+  background: var(--cor-branco);
+}
+
+.grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.erro {
+  color: var(--cor-erro);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.sucesso {
+  color: var(--cor-sucesso);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.acoes {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.btnPrimario {
+  padding: 12px 28px;
+  background: linear-gradient(90deg, var(--cor-fogo), var(--cor-laranja));
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  font-weight: 700;
+  box-shadow: 0 3px 12px rgba(232,82,26,0.3);
+  transition: opacity 0.18s, transform 0.18s;
+}
+
+.btnPrimario:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.btnPrimario:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.btnSecundario {
+  padding: 12px 20px;
+  background: transparent;
+  color: var(--cor-texto-sub);
+  border: 1.5px solid var(--cor-borda);
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all 0.18s;
+}
+
+.btnSecundario:hover { background: var(--cor-creme-esc); }
