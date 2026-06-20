@@ -16,22 +16,11 @@ const camposPrincipais = [
 const camposExtras = [
   { key: 'racaoCachorro', label: 'Ração Cachorro', emoji: '🐶' },
   { key: 'racaoGato',     label: 'Ração Gato',      emoji: '🐱' },
-  { key: 'qtdGarfos',     label: 'Garfos (avulsos)', emoji: '🍴' },
 ];
-
-const camposKitHigiene = [
-  { key: 'qtdSabonete',       label: 'Sabonete',             emoji: '🧼' },
-  { key: 'qtdPastaDente',     label: 'Pasta de dente',       emoji: '🪥' },
-  { key: 'qtdEscovaDente',    label: 'Escova de dente',      emoji: '🦷' },
-  { key: 'qtdAbsorvente',     label: 'Absorvente',           emoji: '🩹' },
-  { key: 'qtdPapelHigienico', label: 'Papel higiênico',      emoji: '🧻' },
-];
-
-const todosCamposNumericos = [...camposPrincipais, ...camposExtras, ...camposKitHigiene];
 
 const estadoInicial = () => {
-  const obj = { data: domingoAtual(), observacoes: '' };
-  todosCamposNumericos.forEach(c => { obj[c.key] = c.key === 'qtdRepeticoes' ? '0' : ''; });
+  const obj = { data: domingoAtual(), observacoes: '', kitHigiene: false, qtdKitHigiene: '' };
+  [...camposPrincipais, ...camposExtras].forEach(c => { obj[c.key] = c.key === 'qtdRepeticoes' ? '0' : ''; });
   return obj;
 };
 
@@ -52,9 +41,11 @@ export default function Registro() {
     setCarregando(true);
     try {
       const payload = { data: form.data, observacoes: form.observacoes };
-      todosCamposNumericos.forEach(c => {
+      [...camposPrincipais, ...camposExtras].forEach(c => {
         payload[c.key] = Number(form[c.key]) || 0;
       });
+      payload.kitHigiene = form.kitHigiene;
+      payload.qtdKitHigiene = form.kitHigiene ? (Number(form.qtdKitHigiene) || 0) : 0;
 
       await api.post('/distribuicoes', payload);
       setSucesso(true);
@@ -103,7 +94,34 @@ export default function Registro() {
 
         {renderGrupo('Distribuição principal', camposPrincipais)}
         {renderGrupo('Itens extras', camposExtras)}
-        {renderGrupo('Kit Higiene (consumo de estoque)', camposKitHigiene)}
+
+        <div className={styles.grupo}>
+          <h3 className={styles.grupoTitulo}>Kit Higiene (opcional)</h3>
+          <div className={styles.campo}>
+            <label className={styles.checkboxLabel}>
+              <input
+                type="checkbox"
+                checked={form.kitHigiene}
+                onChange={e => setForm(p => ({ ...p, kitHigiene: e.target.checked, qtdKitHigiene: '' }))}
+              />
+              🧴 Kit Higiene distribuído
+            </label>
+          </div>
+          {form.kitHigiene && (
+            <div className={styles.campo}>
+              <label>🧴 Quantidade de Kits</label>
+              <input
+                type="number"
+                name="qtdKitHigiene"
+                value={form.qtdKitHigiene}
+                onChange={handleChange}
+                min="0"
+                placeholder="0"
+              />
+              <span className={styles.dica}>Cada kit consome 1 sabonete, 1 pasta de dente, 1 escova, 1 absorvente e 1 papel higiênico do estoque.</span>
+            </div>
+          )}
+        </div>
 
         <div className={styles.campo}>
           <label>📝 Observações <span className={styles.opcional}>(opcional)</span></label>

@@ -9,17 +9,11 @@ const CAMPOS = [
   { key: 'qtdQuentinhas',      label: 'Quentinhas',            emoji: '🍱' },
   { key: 'qtdAguas',           label: 'Águas',                 emoji: '💧' },
   { key: 'qtdBananadasGarfos', label: 'Bananadas + Garfos',    emoji: '🍌' },
-  { key: 'qtdGarfos',          label: 'Garfos avulsos',        emoji: '🍴' },
   { key: 'pessoasPresentes',   label: 'Voluntários presentes', emoji: '🙋' },
   { key: 'pessoasAtendidas',   label: 'Pessoas atendidas',     emoji: '🤝' },
   { key: 'qtdRepeticoes',      label: 'Repetições',            emoji: '🔁' },
   { key: 'racaoCachorro',      label: 'Ração Cachorro',        emoji: '🐶' },
   { key: 'racaoGato',          label: 'Ração Gato',            emoji: '🐱' },
-  { key: 'qtdSabonete',        label: 'Sabonete',              emoji: '🧼' },
-  { key: 'qtdPastaDente',      label: 'Pasta de dente',        emoji: '🪥' },
-  { key: 'qtdEscovaDente',     label: 'Escova de dente',       emoji: '🦷' },
-  { key: 'qtdAbsorvente',      label: 'Absorvente',            emoji: '🩹' },
-  { key: 'qtdPapelHigienico',  label: 'Papel higiênico',       emoji: '🧻' },
 ];
 
 export default function Historico() {
@@ -46,7 +40,11 @@ export default function Historico() {
   const abrirEdicao = (d) => {
     setEditando(d);
     setErroEdicao('');
-    const dados = { observacoes: d.observacoes || '' };
+    const dados = {
+      observacoes: d.observacoes || '',
+      kitHigiene: d.kitHigiene || false,
+      qtdKitHigiene: d.qtdKitHigiene || 0,
+    };
     CAMPOS.forEach(c => { dados[c.key] = d[c.key] ?? 0; });
     setFormEdicao(dados);
   };
@@ -55,7 +53,11 @@ export default function Historico() {
     setSalvando(true);
     setErroEdicao('');
     try {
-      const payload = { observacoes: formEdicao.observacoes };
+      const payload = {
+        observacoes: formEdicao.observacoes,
+        kitHigiene: formEdicao.kitHigiene,
+        qtdKitHigiene: formEdicao.kitHigiene ? (Number(formEdicao.qtdKitHigiene) || 0) : 0,
+      };
       CAMPOS.forEach(c => { payload[c.key] = Number(formEdicao[c.key]) || 0; });
 
       await api.put(`/distribuicoes/${editando._id}`, payload);
@@ -154,6 +156,9 @@ export default function Historico() {
                                 <strong>{c.emoji} {c.label}:</strong> {d[c.key] ?? 0}
                               </span>
                             ))}
+                            <span className={styles.detalheItem}>
+                              <strong>🧴 Kit Higiene:</strong> {d.kitHigiene ? `Sim — ${d.qtdKitHigiene} kit(s)` : 'Não'}
+                            </span>
                           </div>
                           <div className={styles.detalheObs}>
                             <strong>📝 Observações:</strong>{' '}
@@ -191,6 +196,29 @@ export default function Historico() {
                 </div>
               ))}
             </div>
+
+            <div className={styles.campo}>
+              <label className={styles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  checked={formEdicao.kitHigiene || false}
+                  onChange={e => setFormEdicao(p => ({ ...p, kitHigiene: e.target.checked, qtdKitHigiene: e.target.checked ? p.qtdKitHigiene : '' }))}
+                />
+                🧴 Kit Higiene distribuído
+              </label>
+            </div>
+            {formEdicao.kitHigiene && (
+              <div className={styles.campo}>
+                <label>🧴 Quantidade de Kits</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={formEdicao.qtdKitHigiene}
+                  onChange={e => setFormEdicao(p => ({ ...p, qtdKitHigiene: e.target.value }))}
+                  placeholder="0"
+                />
+              </div>
+            )}
 
             <div className={styles.campo}>
               <label>📝 Observações</label>

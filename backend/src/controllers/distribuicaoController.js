@@ -2,84 +2,70 @@ const Distribuicao = require('../models/Distribuicao');
 const Estoque = require('../models/Estoque');
 const MovimentoEstoque = require('../models/MovimentoEstoque');
 
-// Mapeia campo da distribuição -> item de estoque correspondente
-const MAPA_ESTOQUE = {
-  qtdAguas: 'aguas',
-  qtdBananadasGarfos: 'bananadasGarfos',
-  qtdGarfos: 'garfos',
-  qtdSabonete: 'sabonete',
-  qtdPastaDente: 'pastaDente',
-  qtdEscovaDente: 'escovaDente',
-  qtdAbsorvente: 'absorvente',
-  qtdPapelHigienico: 'papelHigienico'
+const ITENS_KIT_HIGIENE = ['sabonete', 'pastaDente', 'escovaDente', 'absorvente', 'papelHigienico'];
+
+// Converte os dados de uma distribuição em um mapa { itemEstoque: quantidadeConsumida }
+const calcularConsumoEstoque = (dados) => {
+  const consumo = {
+    aguas: dados.qtdAguas || 0,
+    bananadasGarfos: dados.qtdBananadasGarfos || 0,
+    garfos: dados.qtdBananadasGarfos || 0, // cada bananada vem com 1 garfo
+  };
+
+  if (dados.kitHigiene && dados.qtdKitHigiene > 0) {
+    ITENS_KIT_HIGIENE.forEach(item => {
+      consumo[item] = dados.qtdKitHigiene;
+    });
+  }
+
+  return consumo;
 };
 
-const descontarEstoque = async (dadosDistribuicao, distribuicaoId, usuarioId) => {
-  for (const [campo, item] of Object.entries(MAPA_ESTOQUE)) {
-    const quantidade = dadosDistribuicao[campo] || 0;
+const aplicarMovimentoEstoque = async (item, quantidade, tipo, motivo, distribuicaoId, usuarioId) => {
+  let estoque = await Estoque.findOne({ item });
+  if (!estoque) estoque = await Estoque.create({ item, quantidade: 0 });
+
+  estoque.quantidade += tipo === 'entrada' ? quantidade : -quantidade;
+  await estoque.save();
+
+  await MovimentoEstoque.create({
+    item, tipo, quantidade, motivo,
+    distribuicaoRelacionada: distribuicaoId,
+    registradoPor: usuarioId
+  });
+};
+
+const descontarEstoque = async (dados, distribuicaoId, usuarioId) => {
+  const consumo = calcularConsumoEstoque(dados);
+  for (const [item, quantidade] of Object.entries(consumo)) {
     if (quantidade <= 0) continue;
-
-    let estoque = await Estoque.findOne({ item });
-    if (!estoque) {
-      estoque = await Estoque.create({ item, quantidade: 0 });
-    }
-    estoque.quantidade -= quantidade;
-    await estoque.save();
-
-    await MovimentoEstoque.create({
-      item,
-      tipo: 'saida',
-      quantidade,
-      motivo: 'Distribuição semanal',
-      distribuicaoRelacionada: distribuicaoId,
-      registradoPor: usuarioId
-    });
+    await aplicarMovimentoEstoque(item, quantidade, 'saida', 'Distribuição semanal', distribuicaoId, usuarioId);
   }
 };
 
 const estornarEstoque = async (dadosAntigos, dadosNovos, distribuicaoId, usuarioId) => {
-  for (const [campo, item] of Object.entries(MAPA_ESTOQUE)) {
-    const antigo = dadosAntigos[campo] || 0;
-    const novo = dadosNovos[campo] !== undefined ? dadosNovos[campo] : antigo;
-    const diferenca = novo - antigo; // positivo = consumir mais; negativo = devolver
+  const consumoAntigo = calcularConsumoEstoque(dadosAntigos);
+  const consumoNovo = calcularConsumoEstoque(dadosNovos);
+  const itens = new Set([...Object.keys(consumoAntigo), ...Object.keys(consumoNovo)]);
 
+  for (const item of itens) {
+    const antigo = consumoAntigo[item] || 0;
+    const novo = consumoNovo[item] || 0;
+    const diferenca = novo - antigo;
     if (diferenca === 0) continue;
 
-    let estoque = await Estoque.findOne({ item });
-    if (!estoque) estoque = await Estoque.create({ item, quantidade: 0 });
-
-    estoque.quantidade -= diferenca;
-    await estoque.save();
-
-    await MovimentoEstoque.create({
-      item,
-      tipo: diferenca > 0 ? 'saida' : 'entrada',
-      quantidade: Math.abs(diferenca),
-      motivo: 'Ajuste de edição de registro',
-      distribuicaoRelacionada: distribuicaoId,
-      registradoPor: usuarioId
-    });
+    await aplicarMovimentoEstoque(
+      item, Math.abs(diferenca), diferenca > 0 ? 'saida' : 'entrada',
+      'Ajuste de edição de registro', distribuicaoId, usuarioId
+    );
   }
 };
 
-const devolverEstoque = async (dadosDistribuicao, distribuicaoId, usuarioId) => {
-  for (const [campo, item] of Object.entries(MAPA_ESTOQUE)) {
-    const quantidade = dadosDistribuicao[campo] || 0;
+const devolverEstoque = async (dados, distribuicaoId, usuarioId) => {
+  const consumo = calcularConsumoEstoque(dados);
+  for (const [item, quantidade] of Object.entries(consumo)) {
     if (quantidade <= 0) continue;
-
-    let estoque = await Estoque.findOne({ item });
-    if (!estoque) estoque = await Estoque.create({ item, quantidade: 0 });
-    estoque.quantidade += quantidade;
-    await estoque.save();
-
-    await MovimentoEstoque.create({
-      item,
-      tipo: 'entrada',
-      quantidade,
-      motivo: 'Exclusão de registro',
-      distribuicaoRelacionada: distribuicaoId,
-      registradoPor: usuarioId
-    });
+    await aplicarMovimentoEstoque(item, quantidade, 'entrada', 'Exclusão de registro', distribuicaoId, usuarioId);
   }
 };
 
@@ -109,10 +95,10 @@ const buscarPorId = async (req, res) => {
 
 const criar = async (req, res) => {
   const {
-    data, qtdQuentinhas, qtdAguas, qtdBananadasGarfos, qtdGarfos,
+    data, qtdQuentinhas, qtdAguas, qtdBananadasGarfos,
     pessoasPresentes, pessoasAtendidas, qtdRepeticoes,
     racaoCachorro, racaoGato,
-    qtdSabonete, qtdPastaDente, qtdEscovaDente, qtdAbsorvente, qtdPapelHigienico,
+    kitHigiene, qtdKitHigiene,
     observacoes
   } = req.body;
 
@@ -129,16 +115,12 @@ const criar = async (req, res) => {
 
     const dados = {
       qtdQuentinhas, qtdAguas, qtdBananadasGarfos,
-      qtdGarfos: qtdGarfos || 0,
       pessoasPresentes, pessoasAtendidas,
       qtdRepeticoes: qtdRepeticoes ?? 0,
       racaoCachorro: racaoCachorro || 0,
       racaoGato: racaoGato || 0,
-      qtdSabonete: qtdSabonete || 0,
-      qtdPastaDente: qtdPastaDente || 0,
-      qtdEscovaDente: qtdEscovaDente || 0,
-      qtdAbsorvente: qtdAbsorvente || 0,
-      qtdPapelHigienico: qtdPapelHigienico || 0,
+      kitHigiene: !!kitHigiene,
+      qtdKitHigiene: kitHigiene ? (qtdKitHigiene || 0) : 0,
     };
 
     const distribuicao = await Distribuicao.create({
@@ -170,32 +152,33 @@ const atualizar = async (req, res) => {
       return res.status(403).json({ erro: 'Sem permissão para editar este registro' });
     }
 
-    const campos = [
-      'qtdQuentinhas', 'qtdAguas', 'qtdBananadasGarfos', 'qtdGarfos',
-      'pessoasPresentes', 'pessoasAtendidas', 'qtdRepeticoes',
-      'racaoCachorro', 'racaoGato',
-      'qtdSabonete', 'qtdPastaDente', 'qtdEscovaDente', 'qtdAbsorvente', 'qtdPapelHigienico',
-      'observacoes'
-    ];
-
     const dadosAntigos = {
       qtdAguas: distribuicao.qtdAguas,
       qtdBananadasGarfos: distribuicao.qtdBananadasGarfos,
-      qtdGarfos: distribuicao.qtdGarfos,
-      qtdSabonete: distribuicao.qtdSabonete,
-      qtdPastaDente: distribuicao.qtdPastaDente,
-      qtdEscovaDente: distribuicao.qtdEscovaDente,
-      qtdAbsorvente: distribuicao.qtdAbsorvente,
-      qtdPapelHigienico: distribuicao.qtdPapelHigienico,
+      kitHigiene: distribuicao.kitHigiene,
+      qtdKitHigiene: distribuicao.qtdKitHigiene,
     };
 
-    const dadosNovos = {};
+    const campos = [
+      'qtdQuentinhas', 'qtdAguas', 'qtdBananadasGarfos',
+      'pessoasPresentes', 'pessoasAtendidas', 'qtdRepeticoes',
+      'racaoCachorro', 'racaoGato',
+      'kitHigiene', 'qtdKitHigiene',
+      'observacoes'
+    ];
+
     campos.forEach(campo => {
-      if (req.body[campo] !== undefined) {
-        distribuicao[campo] = req.body[campo];
-        dadosNovos[campo] = req.body[campo];
-      }
+      if (req.body[campo] !== undefined) distribuicao[campo] = req.body[campo];
     });
+
+    if (!distribuicao.kitHigiene) distribuicao.qtdKitHigiene = 0;
+
+    const dadosNovos = {
+      qtdAguas: distribuicao.qtdAguas,
+      qtdBananadasGarfos: distribuicao.qtdBananadasGarfos,
+      kitHigiene: distribuicao.kitHigiene,
+      qtdKitHigiene: distribuicao.qtdKitHigiene,
+    };
 
     await distribuicao.save();
     await estornarEstoque(dadosAntigos, dadosNovos, distribuicao._id, req.usuario.id);
