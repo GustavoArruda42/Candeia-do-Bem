@@ -25,7 +25,8 @@ const aplicarMovimentoEstoque = async (item, quantidade, tipo, motivo, distribui
   let estoque = await Estoque.findOne({ item });
   if (!estoque) estoque = await Estoque.create({ item, quantidade: 0 });
 
-  estoque.quantidade += tipo === 'entrada' ? quantidade : -quantidade;
+  const novaQuantidade = estoque.quantidade + (tipo === 'entrada' ? quantidade : -quantidade);
+  estoque.quantidade = Math.max(0, novaQuantidade);
   await estoque.save();
 
   await MovimentoEstoque.create({
