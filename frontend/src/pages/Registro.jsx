@@ -4,33 +4,40 @@ import api from '../services/api';
 import { domingoAtual } from '../utils/datas';
 import styles from './Registro.module.css';
 
-const camposNumericos = [
-  { key: 'qtdQuentinhas',      label: 'Quentinhas',              emoji: '🍱', obrigatorio: true },
-  { key: 'qtdAguas',           label: 'Águas',                   emoji: '💧', obrigatorio: true },
-  { key: 'qtdBananadasGarfos', label: 'Bananadas + Garfos',      emoji: '🍌', obrigatorio: true },
-  { key: 'pessoasPresentes',   label: 'Voluntários presentes',   emoji: '🙋', obrigatorio: true },
-  { key: 'pessoasAtendidas',   label: 'Pessoas atendidas',       emoji: '🤝', obrigatorio: true },
-  { key: 'qtdRepeticoes',      label: 'Repetições',              emoji: '🔁', obrigatorio: false },
-  { key: 'racaoCachorro',      label: 'Ração Cachorro', emoji: '🐶', obrigatorio: false },
-  { key: 'racaoGato',          label: 'Ração Gato',     emoji: '🐱', obrigatorio: false },
+const camposPrincipais = [
+  { key: 'qtdQuentinhas',      label: 'Quentinhas',            emoji: '🍱', obrigatorio: true },
+  { key: 'qtdAguas',           label: 'Águas',                 emoji: '💧', obrigatorio: true },
+  { key: 'qtdBananadasGarfos', label: 'Bananadas + Garfos',    emoji: '🍌', obrigatorio: true },
+  { key: 'pessoasPresentes',   label: 'Voluntários presentes', emoji: '🙋', obrigatorio: true },
+  { key: 'pessoasAtendidas',   label: 'Pessoas atendidas',     emoji: '🤝', obrigatorio: true },
+  { key: 'qtdRepeticoes',      label: 'Repetições',            emoji: '🔁', obrigatorio: false },
 ];
+
+const camposExtras = [
+  { key: 'racaoCachorro', label: 'Ração Cachorro', emoji: '🐶' },
+  { key: 'racaoGato',     label: 'Ração Gato',      emoji: '🐱' },
+  { key: 'qtdGarfos',     label: 'Garfos (avulsos)', emoji: '🍴' },
+];
+
+const camposKitHigiene = [
+  { key: 'qtdSabonete',       label: 'Sabonete',             emoji: '🧼' },
+  { key: 'qtdPastaDente',     label: 'Pasta de dente',       emoji: '🪥' },
+  { key: 'qtdEscovaDente',    label: 'Escova de dente',      emoji: '🦷' },
+  { key: 'qtdAbsorvente',     label: 'Absorvente',           emoji: '🩹' },
+  { key: 'qtdPapelHigienico', label: 'Papel higiênico',      emoji: '🧻' },
+];
+
+const todosCamposNumericos = [...camposPrincipais, ...camposExtras, ...camposKitHigiene];
+
+const estadoInicial = () => {
+  const obj = { data: domingoAtual(), observacoes: '' };
+  todosCamposNumericos.forEach(c => { obj[c.key] = c.key === 'qtdRepeticoes' ? '0' : ''; });
+  return obj;
+};
 
 export default function Registro() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({
-    data: domingoAtual(),
-    qtdQuentinhas: '',
-    qtdAguas: '',
-    qtdBananadasGarfos: '',
-    pessoasPresentes: '',
-    pessoasAtendidas: '',
-    qtdRepeticoes: '0',
-    kitHigiene: false,
-    qtdKitHigiene: '',
-    racaoCachorro: '',
-    racaoGato: '',
-    observacoes: '',
-  });
+  const [form, setForm] = useState(estadoInicial());
   const [erro, setErro] = useState('');
   const [sucesso, setSucesso] = useState(false);
   const [carregando, setCarregando] = useState(false);
@@ -44,19 +51,12 @@ export default function Registro() {
     setErro('');
     setCarregando(true);
     try {
-      await api.post('/distribuicoes', {
-        ...form,
-        qtdQuentinhas: Number(form.qtdQuentinhas),
-        qtdAguas: Number(form.qtdAguas),
-        qtdBananadasGarfos: Number(form.qtdBananadasGarfos),
-        pessoasPresentes: Number(form.pessoasPresentes),
-        pessoasAtendidas: Number(form.pessoasAtendidas),
-        qtdRepeticoes: Number(form.qtdRepeticoes) || 0,
-        kitHigiene: form.kitHigiene,
-        qtdKitHigiene: form.kitHigiene ? Number(form.qtdKitHigiene) || 0 : 0,
-        racaoCachorro: Number(form.racaoCachorro) || 0,
-        racaoGato: Number(form.racaoGato) || 0,
+      const payload = { data: form.data, observacoes: form.observacoes };
+      todosCamposNumericos.forEach(c => {
+        payload[c.key] = Number(form[c.key]) || 0;
       });
+
+      await api.post('/distribuicoes', payload);
       setSucesso(true);
       setTimeout(() => navigate('/historico'), 1800);
     } catch (err) {
@@ -65,6 +65,28 @@ export default function Registro() {
       setCarregando(false);
     }
   };
+
+  const renderGrupo = (titulo, campos) => (
+    <div className={styles.grupo}>
+      <h3 className={styles.grupoTitulo}>{titulo}</h3>
+      <div className={styles.grade}>
+        {campos.map(c => (
+          <div key={c.key} className={styles.campo}>
+            <label>{c.emoji} {c.label}</label>
+            <input
+              type="number"
+              name={c.key}
+              value={form[c.key]}
+              onChange={handleChange}
+              min="0"
+              required={c.obrigatorio}
+              placeholder="0"
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
     <div className={styles.pagina}>
@@ -79,49 +101,9 @@ export default function Registro() {
           <input type="date" name="data" value={form.data} onChange={handleChange} required />
         </div>
 
-        <div className={styles.grade}>
-          {camposNumericos.map(c => (
-            <div key={c.key} className={styles.campo}>
-              <label>{c.emoji} {c.label}</label>
-              <input
-                type="number"
-                name={c.key}
-                value={form[c.key]}
-                onChange={handleChange}
-                min="0"
-                required={c.obrigatorio}
-                placeholder="0"
-              />
-            </div>
-          ))}
-        </div>
-
-        <div className={styles.campo}>
-          <label>
-              <input
-                  type="checkbox"
-                  name="kitHigiene"
-                  checked={form.kitHigiene}
-                  onChange={e => setForm(p => ({ ...p, kitHigiene: e.target.checked, qtdKitHigiene: '' }))}
-                  style={{ marginRight: 8 }}
-              />
-            🧴 Kit Higiene distribuído
-          </label>
-        </div>
-
-{form.kitHigiene && (
-  <div className={styles.campo}>
-    <label>🧴 Quantidade de Kits Higiene</label>
-    <input
-      type="number"
-      name="qtdKitHigiene"
-      value={form.qtdKitHigiene}
-      onChange={handleChange}
-      min="0"
-      placeholder="0"
-    />
-  </div>
-)}
+        {renderGrupo('Distribuição principal', camposPrincipais)}
+        {renderGrupo('Itens extras', camposExtras)}
+        {renderGrupo('Kit Higiene (consumo de estoque)', camposKitHigiene)}
 
         <div className={styles.campo}>
           <label>📝 Observações <span className={styles.opcional}>(opcional)</span></label>

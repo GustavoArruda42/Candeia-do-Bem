@@ -61,7 +61,6 @@
 }
 
 .tabela tbody tr:last-child td { border-bottom: none; }
-
 .tabela tbody tr:hover { background: var(--cor-creme); }
 
 .destaque {
@@ -74,8 +73,23 @@
   color: var(--cor-texto-sub) !important;
 }
 
+.acoes { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+.btnEditar {
+  padding: 4px 12px;
+  background: transparent;
+  color: var(--cor-marrom-cl);
+  border: 1px solid var(--cor-marrom-cl);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all 0.15s;
+}
+
+.btnEditar:hover { background: var(--cor-marrom-cl); color: #fff; }
+
 .btnRemover {
-  padding: 5px 12px;
+  padding: 4px 12px;
   background: transparent;
   color: var(--cor-erro);
   border: 1px solid var(--cor-erro);
@@ -119,7 +133,53 @@
   border: 1px dashed var(--cor-borda);
 }
 
-/* Modal de edição */
+.btnExpandir {
+  background: transparent;
+  border: none;
+  color: var(--cor-marrom-cl);
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 4px 8px;
+}
+
+.linhaDetalhe td {
+  background: var(--cor-creme);
+  white-space: normal;
+}
+
+.detalhe {
+  padding: 16px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.detalheGrade {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px 20px;
+}
+
+.detalheItem {
+  font-size: 0.85rem;
+  color: var(--cor-texto);
+}
+
+.detalheItem strong {
+  color: var(--cor-marrom);
+}
+
+.detalheObs {
+  font-size: 0.88rem;
+  color: var(--cor-texto);
+  padding-top: 10px;
+  border-top: 1px dashed var(--cor-borda);
+}
+
+.detalheObs em {
+  color: var(--cor-texto-sub);
+}
+
 .overlay {
   position: fixed;
   inset: 0;
@@ -241,20 +301,5 @@
 }
 
 .btnSecundario:hover { background: var(--cor-creme-esc); }
-
-.acoes { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-
-.btnEditar {
-  padding: 4px 12px;
-  background: transparent;
-  color: var(--cor-marrom-cl);
-  border: 1px solid var(--cor-marrom-cl);
-  border-radius: 6px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  transition: all 0.15s;
-}
-
-.btnEditar:hover { background: var(--cor-marrom-cl); color: #fff; }
 
 .erro { color: var(--cor-erro); font-size: 0.85rem; font-weight: 600; }

@@ -2,18 +2,24 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { formatarData, formatarDataHora, formatarDataInput } from '../utils/datas';
+import { formatarData, formatarDataHora } from '../utils/datas';
 import styles from './Historico.module.css';
 
 const CAMPOS = [
   { key: 'qtdQuentinhas',      label: 'Quentinhas',            emoji: '🍱' },
   { key: 'qtdAguas',           label: 'Águas',                 emoji: '💧' },
   { key: 'qtdBananadasGarfos', label: 'Bananadas + Garfos',    emoji: '🍌' },
+  { key: 'qtdGarfos',          label: 'Garfos avulsos',        emoji: '🍴' },
   { key: 'pessoasPresentes',   label: 'Voluntários presentes', emoji: '🙋' },
   { key: 'pessoasAtendidas',   label: 'Pessoas atendidas',     emoji: '🤝' },
   { key: 'qtdRepeticoes',      label: 'Repetições',            emoji: '🔁' },
-  { key: 'racaoCachorro', label: 'Ração Cachorro', emoji: '🐶' },
-  { key: 'racaoGato',     label: 'Ração Gato',     emoji: '🐱' },
+  { key: 'racaoCachorro',      label: 'Ração Cachorro',        emoji: '🐶' },
+  { key: 'racaoGato',          label: 'Ração Gato',            emoji: '🐱' },
+  { key: 'qtdSabonete',        label: 'Sabonete',              emoji: '🧼' },
+  { key: 'qtdPastaDente',      label: 'Pasta de dente',        emoji: '🪥' },
+  { key: 'qtdEscovaDente',     label: 'Escova de dente',       emoji: '🦷' },
+  { key: 'qtdAbsorvente',      label: 'Absorvente',            emoji: '🩹' },
+  { key: 'qtdPapelHigienico',  label: 'Papel higiênico',       emoji: '🧻' },
 ];
 
 export default function Historico() {
@@ -22,10 +28,11 @@ export default function Historico() {
   const [distribuicoes, setDistribuicoes] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [confirmandoId, setConfirmandoId] = useState(null);
-  const [editando, setEditando] = useState(null); // distribuição em edição
+  const [editando, setEditando] = useState(null);
   const [formEdicao, setFormEdicao] = useState({});
   const [salvando, setSalvando] = useState(false);
   const [erroEdicao, setErroEdicao] = useState('');
+  const [expandido, setExpandido] = useState(null);
 
   const carregar = () => {
     api.get('/distribuicoes').then(({ data }) => setDistribuicoes(data)).finally(() => setCarregando(false));
@@ -39,38 +46,19 @@ export default function Historico() {
   const abrirEdicao = (d) => {
     setEditando(d);
     setErroEdicao('');
-    setFormEdicao({
-      qtdQuentinhas:      d.qtdQuentinhas,
-      qtdAguas:           d.qtdAguas,
-      qtdBananadasGarfos: d.qtdBananadasGarfos,
-      pessoasPresentes:   d.pessoasPresentes,
-      pessoasAtendidas:   d.pessoasAtendidas,
-      qtdRepeticoes:      d.qtdRepeticoes,
-      observacoes:        d.observacoes || '',
-      kitHigiene:  d.kitHigiene || false,
-      qtdKitHigiene: d.qtdKitHigiene || 0,
-      racaoCachorro: d.racaoCachorro || 0,
-      racaoGato:     d.racaoGato || 0,
-    });
+    const dados = { observacoes: d.observacoes || '' };
+    CAMPOS.forEach(c => { dados[c.key] = d[c.key] ?? 0; });
+    setFormEdicao(dados);
   };
 
   const salvarEdicao = async () => {
     setSalvando(true);
     setErroEdicao('');
     try {
-      await api.put(`/distribuicoes/${editando._id}`, {
-        ...formEdicao,
-        qtdQuentinhas:      Number(formEdicao.qtdQuentinhas),
-        qtdAguas:           Number(formEdicao.qtdAguas),
-        qtdBananadasGarfos: Number(formEdicao.qtdBananadasGarfos),
-        pessoasPresentes:   Number(formEdicao.pessoasPresentes),
-        pessoasAtendidas:   Number(formEdicao.pessoasAtendidas),
-        qtdRepeticoes:      Number(formEdicao.qtdRepeticoes) || 0,
-        kitHigiene: formEdicao.kitHigiene,
-        qtdKitHigiene: formEdicao.kitHigiene ? Number(formEdicao.qtdKitHigiene) || 0 : 0,
-        racaoCachorro: Number(formEdicao.racaoCachorro) || 0,
-        racaoGato:     Number(formEdicao.racaoGato) || 0,
-      });
+      const payload = { observacoes: formEdicao.observacoes };
+      CAMPOS.forEach(c => { payload[c.key] = Number(formEdicao[c.key]) || 0; });
+
+      await api.put(`/distribuicoes/${editando._id}`, payload);
       setEditando(null);
       carregar();
     } catch (err) {
@@ -91,9 +79,6 @@ export default function Historico() {
   };
 
   if (carregando) return <div className={styles.loading}>Carregando...</div>;
-  
-  console.log('usuario:', usuario);
-  console.log('registradoPor:', distribuicoes[0]?.registradoPor);
 
   return (
     <div className={styles.pagina}>
@@ -111,16 +96,12 @@ export default function Historico() {
           <table className={styles.tabela}>
             <thead>
               <tr>
+                <th></th>
                 <th>Data</th>
                 <th>🍱 Quentinhas</th>
                 <th>💧 Águas</th>
                 <th>🍌 Bananadas</th>
-                <th>🙋 Presentes</th>
                 <th>🤝 Atendidos</th>
-                <th>🔁 Repetições</th>
-                <th>🧴 Kit Higiene</th>
-                <th>🐶 Ração Cachorro</th>
-                <th>🐱 Ração Gato</th>
                 <th>Registrado por</th>
                 <th>Registrado em</th>
                 <th>Ações</th>
@@ -128,47 +109,67 @@ export default function Historico() {
             </thead>
             <tbody>
               {distribuicoes.map(d => (
-                <tr key={d._id}>
-                  <td className={styles.destaque}>{formatarData(d.data)}</td>
-                  <td>{d.qtdQuentinhas}</td>
-                  <td>{d.qtdAguas}</td>
-                  <td>{d.qtdBananadasGarfos}</td>
-                  <td>{d.pessoasPresentes}</td>
-                  <td>{d.pessoasAtendidas}</td>
-                  <td>{d.qtdRepeticoes}</td>
-                  <td>{d.kitHigiene ? `✅ ${d.qtdKitHigiene}` : '—'}</td>
-                  <td>{d.racaoCachorro || '—'}</td>
-                  <td>{d.racaoGato || '—'}</td>
-                  <td>{d.registradoPor?.username || '—'}</td>
-                  <td className={styles.datahora}>{formatarDataHora(d.createdAt)}</td>
-                  <td>
-                    {podeEditar(d) && (
-                      <div className={styles.acoes}>
-                        <button className={styles.btnEditar} onClick={() => abrirEdicao(d)}>
-                          Editar
-                        </button>
-                        {confirmandoId === d._id ? (
-                          <span className={styles.confirmar}>
-                            Confirmar?{' '}
-                            <button className={styles.btnSim} onClick={() => remover(d._id)}>Sim</button>{' '}
-                            <button className={styles.btnNao} onClick={() => setConfirmandoId(null)}>Não</button>
-                          </span>
-                        ) : (
-                          <button className={styles.btnRemover} onClick={() => setConfirmandoId(d._id)}>
-                            Excluir
-                          </button>
-                        )}
-                      </div>
-                    )}
-                  </td>
-                </tr>
+                <>
+                  <tr key={d._id}>
+                    <td>
+                      <button
+                        className={styles.btnExpandir}
+                        onClick={() => setExpandido(expandido === d._id ? null : d._id)}
+                        title="Ver detalhes"
+                      >
+                        {expandido === d._id ? '▾' : '▸'}
+                      </button>
+                    </td>
+                    <td className={styles.destaque}>{formatarData(d.data)}</td>
+                    <td>{d.qtdQuentinhas}</td>
+                    <td>{d.qtdAguas}</td>
+                    <td>{d.qtdBananadasGarfos}</td>
+                    <td>{d.pessoasAtendidas}</td>
+                    <td>{d.registradoPor?.username || '—'}</td>
+                    <td className={styles.datahora}>{formatarDataHora(d.createdAt)}</td>
+                    <td>
+                      {podeEditar(d) && (
+                        <div className={styles.acoes}>
+                          <button className={styles.btnEditar} onClick={() => abrirEdicao(d)}>Editar</button>
+                          {confirmandoId === d._id ? (
+                            <span className={styles.confirmar}>
+                              Confirmar?{' '}
+                              <button className={styles.btnSim} onClick={() => remover(d._id)}>Sim</button>{' '}
+                              <button className={styles.btnNao} onClick={() => setConfirmandoId(null)}>Não</button>
+                            </span>
+                          ) : (
+                            <button className={styles.btnRemover} onClick={() => setConfirmandoId(d._id)}>Excluir</button>
+                          )}
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                  {expandido === d._id && (
+                    <tr className={styles.linhaDetalhe}>
+                      <td colSpan={9}>
+                        <div className={styles.detalhe}>
+                          <div className={styles.detalheGrade}>
+                            {CAMPOS.map(c => (
+                              <span key={c.key} className={styles.detalheItem}>
+                                <strong>{c.emoji} {c.label}:</strong> {d[c.key] ?? 0}
+                              </span>
+                            ))}
+                          </div>
+                          <div className={styles.detalheObs}>
+                            <strong>📝 Observações:</strong>{' '}
+                            {d.observacoes ? d.observacoes : <em>Nenhuma observação registrada.</em>}
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </>
               ))}
             </tbody>
           </table>
         </div>
       )}
 
-      {/* Modal de edição */}
       {editando && (
         <div className={styles.overlay} onClick={() => setEditando(null)}>
           <div className={styles.modal} onClick={e => e.stopPropagation()}>
@@ -190,30 +191,7 @@ export default function Historico() {
                 </div>
               ))}
             </div>
-            <div className={styles.campo}>
-  <label>
-    <input
-      type="checkbox"
-      checked={formEdicao.kitHigiene || false}
-      onChange={e => setFormEdicao(p => ({ ...p, kitHigiene: e.target.checked, qtdKitHigiene: '' }))}
-      style={{ marginRight: 8 }}
-    />
-    🧴 Kit Higiene distribuído
-  </label>
-</div>
 
-{formEdicao.kitHigiene && (
-  <div className={styles.campo}>
-    <label>🧴 Quantidade de Kits Higiene</label>
-    <input
-      type="number"
-      min="0"
-      value={formEdicao.qtdKitHigiene || ''}
-      onChange={e => setFormEdicao(p => ({ ...p, qtdKitHigiene: e.target.value }))}
-      placeholder="0"
-    />
-  </div>
-)}
             <div className={styles.campo}>
               <label>📝 Observações</label>
               <textarea

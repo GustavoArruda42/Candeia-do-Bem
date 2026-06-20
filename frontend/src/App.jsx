@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Registro from './pages/Registro';
 import Historico from './pages/Historico';
+import Estoque from './pages/Estoque';
 import Usuarios from './pages/Usuarios';
 
 const Protegida = ({ children, apenasAdmin }) => {
@@ -24,6 +25,7 @@ export default function App() {
           <Route path="/dashboard" element={<Protegida><Dashboard /></Protegida>} />
           <Route path="/registro" element={<Protegida><Registro /></Protegida>} />
           <Route path="/historico" element={<Protegida><Historico /></Protegida>} />
+          <Route path="/estoque" element={<Protegida><Estoque /></Protegida>} />
           <Route path="/usuarios" element={<Protegida apenasAdmin><Usuarios /></Protegida>} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>

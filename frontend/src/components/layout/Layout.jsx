@@ -6,6 +6,7 @@ const icones = {
   dashboard: '📊',
   registro: '✍️',
   historico: '📋',
+  estoque: '📦',
   usuarios: '👥',
 };
 
@@ -38,6 +39,9 @@ export default function Layout({ children }) {
           </NavLink>
           <NavLink to="/historico" className={({ isActive }) => `${styles.link} ${isActive ? styles.ativo : ''}`}>
             {icones.historico} Histórico
+          </NavLink>
+          <NavLink to="/estoque" className={({ isActive }) => `${styles.link} ${isActive ? styles.ativo : ''}`}>
+            {icones.estoque} Estoque
           </NavLink>
           {usuario?.role === 'admin' && (
             <NavLink to="/usuarios" className={({ isActive }) => `${styles.link} ${isActive ? styles.ativo : ''}`}>

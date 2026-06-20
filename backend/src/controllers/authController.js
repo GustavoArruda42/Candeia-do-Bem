@@ -86,4 +86,31 @@ const removerUsuario = async (req, res) => {
   }
 };
 
-module.exports = { login, cadastrar, listarUsuarios, removerUsuario };
+const cadastroPublico = async (req, res) => {
+  const { username, senha } = req.body;
+
+  if (!username || !senha) {
+    return res.status(400).json({ erro: 'Username e senha são obrigatórios' });
+  }
+
+  if (senha.length < 6) {
+    return res.status(400).json({ erro: 'A senha deve ter no mínimo 6 caracteres' });
+  }
+
+  try {
+    const existe = await Usuario.findOne({ username });
+    if (existe) {
+      return res.status(409).json({ erro: 'Username já está em uso' });
+    }
+
+    const senhaHash = await bcrypt.hash(senha, 10);
+    const usuario = await Usuario.create({ username, senhaHash, role: 'membro' });
+
+    res.status(201).json({ mensagem: 'Conta criada com sucesso', usuario: { id: usuario._id, username: usuario.username, role: usuario.role } });
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro interno do servidor' });
+  }
+};
+
+
+module.exports = { login, cadastrar, cadastroPublico, listarUsuarios, removerUsuario };

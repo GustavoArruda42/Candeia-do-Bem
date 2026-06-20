@@ -1,4 +1,4 @@
-.pagina { display: flex; flex-direction: column; gap: 28px; max-width: 700px; }
+.pagina { display: flex; flex-direction: column; gap: 28px; max-width: 760px; }
 
 .cabecalho h1 { font-size: 1.8rem; margin-bottom: 6px; }
 .cabecalho p { color: var(--cor-texto-sub); font-size: 0.95rem; }
@@ -56,6 +56,19 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 16px;
+}
+
+.grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-top: 1px solid var(--cor-creme-esc);
+  padding-top: 18px;
+}
+
+.grupoTitulo {
+  font-size: 0.95rem;
+  color: var(--cor-marrom-cl);
 }
 
 .erro {

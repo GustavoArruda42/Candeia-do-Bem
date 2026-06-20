@@ -15,6 +15,49 @@
   font-weight: 600;
 }
 
+.filtros {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.filtroCampo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filtroCampo label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--cor-marrom);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.filtroCampo select {
+  padding: 9px 12px;
+  border: 1.5px solid var(--cor-borda);
+  border-radius: var(--radius-sm);
+  background: var(--cor-branco);
+  color: var(--cor-texto);
+  font-weight: 600;
+  min-width: 160px;
+}
+
+.limparFiltro {
+  padding: 9px 16px;
+  background: transparent;
+  border: 1.5px solid var(--cor-borda);
+  border-radius: var(--radius-sm);
+  color: var(--cor-texto-sub);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.limparFiltro:hover { background: var(--cor-creme-esc); }
+
 .cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -52,6 +95,53 @@
   font-size: 0.82rem;
   color: var(--cor-texto-sub);
   font-weight: 600;
+}
+
+.estatisticas {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.estatisticas h2 {
+  font-size: 1.1rem;
+}
+
+.statsGrade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.statCard {
+  background: var(--cor-branco);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: var(--sombra-sm);
+  border: 1px solid var(--cor-borda);
+}
+
+.statEmoji {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+}
+
+.statLabel {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--cor-texto-sub);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.statValor {
+  display: block;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--cor-marrom);
 }
 
 .grafico {
