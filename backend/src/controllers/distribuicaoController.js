@@ -9,7 +9,9 @@ const calcularConsumoEstoque = (dados) => {
   const consumo = {
     aguas: dados.qtdAguas || 0,
     bananadasGarfos: dados.qtdBananadasGarfos || 0,
-    garfos: dados.qtdBananadasGarfos || 0, // cada bananada vem com 1 garfo
+    garfos: dados.qtdBananadasGarfos || 0,
+    racaoCachorro: dados.racaoCachorro || 0,
+    racaoGato: dados.racaoGato || 0,
   };
 
   if (dados.kitHigiene && dados.qtdKitHigiene > 0) {
@@ -20,7 +22,6 @@ const calcularConsumoEstoque = (dados) => {
 
   return consumo;
 };
-
 const aplicarMovimentoEstoque = async (item, quantidade, tipo, motivo, distribuicaoId, usuarioId) => {
   let estoque = await Estoque.findOne({ item });
   if (!estoque) estoque = await Estoque.create({ item, quantidade: 0 });
@@ -153,9 +154,11 @@ const atualizar = async (req, res) => {
       return res.status(403).json({ erro: 'Sem permissão para editar este registro' });
     }
 
-    const dadosAntigos = {
+    const dadosNovos = {
       qtdAguas: distribuicao.qtdAguas,
       qtdBananadasGarfos: distribuicao.qtdBananadasGarfos,
+      racaoCachorro: distribuicao.racaoCachorro,
+      racaoGato: distribuicao.racaoGato,
       kitHigiene: distribuicao.kitHigiene,
       qtdKitHigiene: distribuicao.qtdKitHigiene,
     };
@@ -174,9 +177,11 @@ const atualizar = async (req, res) => {
 
     if (!distribuicao.kitHigiene) distribuicao.qtdKitHigiene = 0;
 
-    const dadosNovos = {
+    const dadosAntigos = {
       qtdAguas: distribuicao.qtdAguas,
       qtdBananadasGarfos: distribuicao.qtdBananadasGarfos,
+      racaoCachorro: distribuicao.racaoCachorro,
+      racaoGato: distribuicao.racaoGato,
       kitHigiene: distribuicao.kitHigiene,
       qtdKitHigiene: distribuicao.qtdKitHigiene,
     };
