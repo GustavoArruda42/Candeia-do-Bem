@@ -84,4 +84,37 @@ const historico = async (req, res) => {
   }
 };
 
-module.exports = { listar, adicionarEntrada, atualizarMinimo, historico };
+const adicionarSaida = async (req, res) => {
+  const { item, quantidade, motivo } = req.body;
+
+  if (!item || !ITENS_ESTOQUE.includes(item)) {
+    return res.status(400).json({ erro: 'Item de estoque inválido' });
+  }
+  if (!quantidade || quantidade <= 0) {
+    return res.status(400).json({ erro: 'Quantidade deve ser maior que zero' });
+  }
+
+  try {
+    let estoque = await Estoque.findOne({ item });
+    if (!estoque) {
+      estoque = await Estoque.create({ item, quantidade: 0 });
+    }
+
+    estoque.quantidade = Math.max(0, estoque.quantidade - Number(quantidade));
+    await estoque.save();
+
+    await MovimentoEstoque.create({
+      item,
+      tipo: 'saida',
+      quantidade: Number(quantidade),
+      motivo: motivo || 'Retirada manual',
+      registradoPor: req.usuario.id
+    });
+
+    res.json(estoque);
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro interno do servidor' });
+  }
+};
+
+module.exports = { listar, adicionarEntrada, adicionarSaida, atualizarMinimo, historico };

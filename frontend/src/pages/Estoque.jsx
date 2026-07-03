@@ -5,16 +5,16 @@ import { formatarDataHora } from '../utils/datas';
 import styles from './Estoque.module.css';
 
 const ROTULOS = {
-  aguas:            { label: 'Águas',              emoji: '💧' },
-  bananadasGarfos:  { label: 'Bananadas + Garfos',  emoji: '🍌' },
-  garfos:           { label: 'Garfos avulsos',      emoji: '🍴' },
-  sabonete:         { label: 'Sabonete',            emoji: '🧼' },
-  pastaDente:       { label: 'Pasta de dente',      emoji: '🪥' },
-  escovaDente:      { label: 'Escova de dente',     emoji: '🦷' },
-  absorvente:       { label: 'Absorvente',          emoji: '🩹' },
-  papelHigienico:   { label: 'Papel higiênico',     emoji: '🧻' },
-  racaoCachorro: { label: 'Ração Cachorro', emoji: '🐶' },
-  racaoGato:     { label: 'Ração Gato',     emoji: '🐱' },
+  aguas:           { label: 'Águas',             emoji: '💧' },
+  bananadasGarfos: { label: 'Bananadas + Garfos', emoji: '🍌' },
+  garfos:          { label: 'Garfos avulsos',     emoji: '🍴' },
+  sabonete:        { label: 'Sabonete',           emoji: '🧼' },
+  pastaDente:      { label: 'Pasta de dente',     emoji: '🪥' },
+  escovaDente:     { label: 'Escova de dente',    emoji: '🦷' },
+  absorvente:      { label: 'Absorvente',         emoji: '🩹' },
+  papelHigienico:  { label: 'Papel higiênico',    emoji: '🧻' },
+  racaoCachorro:   { label: 'Ração Cachorro',     emoji: '🐶' },
+  racaoGato:       { label: 'Ração Gato',         emoji: '🐱' },
 };
 
 export default function Estoque() {
@@ -23,10 +23,12 @@ export default function Estoque() {
   const [historico, setHistorico] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [mostrarHistorico, setMostrarHistorico] = useState(false);
-
   const [modalItem, setModalItem] = useState(null);
   const [quantidade, setQuantidade] = useState('');
   const [motivo, setMotivo] = useState('');
+  const [modalSaida, setModalSaida] = useState(null);
+  const [quantidadeSaida, setQuantidadeSaida] = useState('');
+  const [motivoSaida, setMotivoSaida] = useState('');
   const [erro, setErro] = useState('');
   const [salvando, setSalvando] = useState(false);
 
@@ -72,6 +74,28 @@ export default function Estoque() {
     }
   };
 
+  const confirmarSaida = async () => {
+    if (!quantidadeSaida || Number(quantidadeSaida) <= 0) {
+      setErro('Informe uma quantidade válida');
+      return;
+    }
+    setSalvando(true);
+    setErro('');
+    try {
+      await api.post('/estoque/saida', {
+        item: modalSaida.item,
+        quantidade: Number(quantidadeSaida),
+        motivo: motivoSaida,
+      });
+      setModalSaida(null);
+      carregar();
+    } catch (err) {
+      setErro(err.response?.data?.erro || 'Erro ao registrar saída');
+    } finally {
+      setSalvando(false);
+    }
+  };
+
   if (carregando) return <div className={styles.loading}>Carregando...</div>;
 
   return (
@@ -92,9 +116,19 @@ export default function Estoque() {
               <span className={styles.cardValor}>{i.quantidade}</span>
               {baixo && <span className={styles.alerta}>⚠️ Estoque baixo</span>}
               {usuario?.role === 'admin' && (
-                <button className={styles.btnEntrada} onClick={() => abrirEntrada(i)}>
-                  + Adicionar entrada
-                </button>
+                <>
+                  <button className={styles.btnEntrada} onClick={() => abrirEntrada(i)}>
+                    + Adicionar entrada
+                  </button>
+                  <button className={styles.btnSaida} onClick={() => {
+                    setModalSaida(i);
+                    setQuantidadeSaida('');
+                    setMotivoSaida('');
+                    setErro('');
+                  }}>
+                    − Registrar retirada
+                  </button>
+                </>
               )}
             </div>
           );
@@ -181,6 +215,47 @@ export default function Estoque() {
           </div>
         </div>
       )}
+
+      {modalSaida && (
+        <div className={styles.overlay} onClick={() => setModalSaida(null)}>
+          <div className={styles.modal} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalTopo}>
+              <h2>{ROTULOS[modalSaida.item]?.emoji} Registrar retirada — {ROTULOS[modalSaida.item]?.label}</h2>
+              <button className={styles.fechar} onClick={() => setModalSaida(null)}>✕</button>
+            </div>
+
+            <div className={styles.campo}>
+              <label>Quantidade retirada</label>
+              <input
+                type="number"
+                min="1"
+                value={quantidadeSaida}
+                onChange={e => setQuantidadeSaida(e.target.value)}
+                placeholder="0"
+                autoFocus
+              />
+            </div>
+
+            <div className={styles.campo}>
+              <label>Motivo <span className={styles.opcional}>(opcional)</span></label>
+              <input
+                type="text"
+                value={motivoSaida}
+                onChange={e => setMotivoSaida(e.target.value)}
+                placeholder="Ex: item vencido, doação extra..."
+              />
+            </div>
+
+            {erro && <p className={styles.erro}>⚠️ {erro}</p>}
+
+            <div className={styles.modalAcoes}>
+              <button className={styles.btnSecundario} onClick={() => setModalSaida(null)}>Cancelar</button>
+              <button className={styles.btnPerigo} onClick={confirmarSaida} disabled={salvando}>
+                {salvando ? 'Salvando...' : 'Confirmar retirada'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
-  );
-}
+  );}

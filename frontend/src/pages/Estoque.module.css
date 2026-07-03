@@ -231,3 +231,31 @@
 }
 
 .btnSecundario:hover { background: var(--cor-creme-esc); }
+
+.btnSaida {
+  width: 100%;
+  padding: 7px;
+  background: var(--cor-creme);
+  border: 1px solid var(--cor-erro);
+  border-radius: var(--radius-sm);
+  color: var(--cor-erro);
+  font-size: 0.8rem;
+  font-weight: 700;
+  transition: background 0.18s;
+}
+
+.btnSaida:hover { background: rgba(198,40,40,0.08); }
+
+.btnPerigo {
+  padding: 11px 24px;
+  background: var(--cor-erro);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 700;
+  transition: opacity 0.18s;
+}
+
+.btnPerigo:hover:not(:disabled) { opacity: 0.88; }
+.btnPerigo:disabled { opacity: 0.6; cursor: not-allowed; }
