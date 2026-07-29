@@ -9,7 +9,7 @@ const ROTULOS = {
   bananadasGarfos: { label: 'Bananadas + Garfos', emoji: '🍌' },
   garfos:          { label: 'Garfos avulsos',     emoji: '🍴' },
   sabonete:        { label: 'Sabonete',           emoji: '🧼' },
-  pastaDente:      { label: 'Pasta de dente',     emoji: '🪥' },
+  pastaDente:      { label: 'Pasta de dente',     emoji: '👅' },
   escovaDente:     { label: 'Escova de dente',    emoji: '🦷' },
   absorvente:      { label: 'Absorvente',         emoji: '🩹' },
   papelHigienico:  { label: 'Papel higiênico',    emoji: '🧻' },
