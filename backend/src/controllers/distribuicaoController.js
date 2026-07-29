@@ -154,8 +154,7 @@ const atualizar = async (req, res) => {
       return res.status(403).json({ erro: 'Sem permissão para editar este registro' });
     }
 
-    // Captura valores antigos ANTES de qualquer modificação
-    const dadosAntigos = {
+    const dadosNovos = {
       qtdAguas: distribuicao.qtdAguas,
       qtdBananadasGarfos: distribuicao.qtdBananadasGarfos,
       racaoCachorro: distribuicao.racaoCachorro,
@@ -164,7 +163,6 @@ const atualizar = async (req, res) => {
       qtdKitHigiene: distribuicao.qtdKitHigiene,
     };
 
-    // Aplica os novos valores
     const campos = [
       'qtdQuentinhas', 'qtdAguas', 'qtdBananadasGarfos',
       'pessoasPresentes', 'pessoasAtendidas', 'qtdRepeticoes',
@@ -179,8 +177,7 @@ const atualizar = async (req, res) => {
 
     if (!distribuicao.kitHigiene) distribuicao.qtdKitHigiene = 0;
 
-    // Captura valores novos DEPOIS das modificações
-    const dadosNovos = {
+    const dadosAntigos = {
       qtdAguas: distribuicao.qtdAguas,
       qtdBananadasGarfos: distribuicao.qtdBananadasGarfos,
       racaoCachorro: distribuicao.racaoCachorro,

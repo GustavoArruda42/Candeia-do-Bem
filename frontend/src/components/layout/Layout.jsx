@@ -8,6 +8,7 @@ const icones = {
   historico: '📋',
   estoque: '📦',
   usuarios: '👥',
+  escala: '📅',
 };
 
 export default function Layout({ children }) {
@@ -43,10 +44,14 @@ export default function Layout({ children }) {
           <NavLink to="/estoque" className={({ isActive }) => `${styles.link} ${isActive ? styles.ativo : ''}`}>
             {icones.estoque} Estoque
           </NavLink>
+          <NavLink to="/escala" className={({ isActive }) => `${styles.link} ${isActive ? styles.ativo : ''}`}>
+              {icones.escala} Escala
+            </NavLink>
           {usuario?.role === 'admin' && (
             <NavLink to="/usuarios" className={({ isActive }) => `${styles.link} ${isActive ? styles.ativo : ''}`}>
               {icones.usuarios} Usuários
             </NavLink>
+            
           )}
         </nav>
 

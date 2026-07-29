@@ -7,6 +7,7 @@ import Registro from './pages/Registro';
 import Historico from './pages/Historico';
 import Estoque from './pages/Estoque';
 import Usuarios from './pages/Usuarios';
+import Escala from './pages/Escala';
 
 const Protegida = ({ children, apenasAdmin }) => {
   const { usuario, carregando } = useAuth();
@@ -28,8 +29,12 @@ export default function App() {
           <Route path="/estoque" element={<Protegida><Estoque /></Protegida>} />
           <Route path="/usuarios" element={<Protegida apenasAdmin><Usuarios /></Protegida>} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/escala" element={<Protegida><Escala /></Protegida>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
   );
 }
+
+
+

@@ -6,6 +6,10 @@ const authRoutes = require('./routes/auth');
 const distribuicaoRoutes = require('./routes/distribuicoes');
 const estoqueRoutes = require('./routes/estoque');
 const app = express();
+const integrantesRoutes = require('./routes/integrantes');
+const cozinheirasRoutes = require('./routes/cozinheiras');
+const escalasRoutes = require('./routes/escalas');
+
 
 connectDB();
 
@@ -23,5 +27,8 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/distribuicoes', distribuicaoRoutes);
 app.use('/api/estoque', estoqueRoutes);
+app.use('/api/integrantes', integrantesRoutes);
+app.use('/api/cozinheiras', cozinheirasRoutes);
+app.use('/api/escalas', escalasRoutes);
 
 module.exports = app;
