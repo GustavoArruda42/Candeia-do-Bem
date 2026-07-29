@@ -66,15 +66,16 @@
 
 .layout {
   display: grid;
-  grid-template-columns: 150px 1fr;
+  grid-template-columns: 320px 1fr;
   gap: 12px;
   align-items: start;
 }
 
 .sidebar {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 5px;
+  align-content: start;
 }
 
 .sidebarTitulo {
@@ -124,7 +125,7 @@
   min-width: max-content;
 }
 
-.dia { width: 150px; flex-shrink: 0; }
+.dia { width: 180px; flex-shrink: 0; }
 
 .diaHeader { margin-bottom: 6px; }
 .diaData { display: block; font-size: 0.9rem; font-weight: 700; color: var(--cor-fogo); }
@@ -168,6 +169,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 4px;
+  flex-wrap: wrap;
 }
 
 .alocadoNome {
@@ -177,7 +179,6 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 70px;
 }
 
 .alocadoAcoes { display: flex; align-items: center; gap: 3px; flex-shrink: 0; }

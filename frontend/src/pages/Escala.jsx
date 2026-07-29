@@ -220,6 +220,30 @@ export default function Escala() {
   const contagemMensal = {};
   integrantes.forEach(i => { contagemMensal[i._id] = 0; });
 
+  const [contagemAnualReal, setContagemAnualReal] = useState({});
+
+useEffect(() => {
+  const buscarAnual = async () => {
+    const contagem = {};
+    integrantes.forEach(i => { contagem[i._id] = 0; });
+    try {
+      for (let m = 1; m <= 12; m++) {
+        const res = await api.get(`/escalas?mes=${m}&ano=${ano}`);
+        if (res.data) {
+          res.data.domingos.forEach(d => {
+            d.alocacoes.forEach(a => {
+              const id = a.integrante._id || a.integrante;
+              contagem[id] = (contagem[id] || 0) + 1;
+            });
+          });
+        }
+      }
+    } catch {}
+    setContagemAnualReal(contagem);
+  };
+  if (integrantes.length > 0) buscarAnual();
+}, [integrantes, ano]);
+
   if (escala) {
     domingos.forEach(d => {
       const info = getDomingo(d);
@@ -462,7 +486,16 @@ export default function Escala() {
           );
         })}
       </div>
-
+      <div className={styles.secaoLabel} style={{ marginTop: '1rem' }}>Participações em {ano}</div>
+      <div className={styles.contadores}>
+        {integrantes.map(i => (
+          <div key={i._id} className={styles.counterChip}>
+            <span className={styles.counterNum}>{contagemAnualReal[i._id] || 0}</span>
+            <span className={styles.counterNome}>{i.nome}</span>
+          </div>
+        ))}
+      </div>
+      
       {/* Modal gestão integrantes */}
       {modalGestao === 'integrantes' && (
         <div className={styles.overlay} onClick={() => setModalGestao(null)}>
