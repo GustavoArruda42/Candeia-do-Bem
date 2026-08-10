@@ -406,3 +406,9 @@
 }
 
 .btnRemGestao:hover { background: var(--cor-erro); color: #fff; }
+
+.contadorTotal {
+  color: var(--cor-texto-sub);
+  font-weight: 400;
+  font-size: 0.7rem;
+}

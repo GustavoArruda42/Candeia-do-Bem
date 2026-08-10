@@ -323,7 +323,7 @@ useEffect(() => {
       <div className={styles.secaoLabel}>Distribuição — motoristas e ajudantes</div>
       <div className={styles.layout}>
         <div className={styles.sidebar}>
-          <div className={styles.sidebarTitulo}>Integrantes</div>
+          <div className={styles.sidebarTitulo}>Integrantes <span className={styles.contadorTotal}>({integrantes.length})</span></div>
           {integrantes.map(i => (
             <div
               key={i._id}
@@ -399,7 +399,7 @@ useEffect(() => {
       </div>
 
       {/* Seção Cozinheiras */}
-      <div className={styles.secaoLabel} style={{ marginTop: '1.5rem' }}>Cozinheiras</div>
+      <div className={styles.sidebarTitulo}>Cozinheiras <span className={styles.contadorTotal}>({cozinheiras.length})</span></div>
       <div className={styles.layout}>
         <div className={styles.sidebar}>
           <div className={styles.sidebarTitulo}>Cozinheiras</div>
