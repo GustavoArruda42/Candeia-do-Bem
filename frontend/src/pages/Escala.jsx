@@ -402,7 +402,6 @@ useEffect(() => {
       <div className={styles.sidebarTitulo}>Cozinheiras <span className={styles.contadorTotal}>({cozinheiras.length})</span></div>
       <div className={styles.layout}>
         <div className={styles.sidebar}>
-          <div className={styles.sidebarTitulo}>Cozinheiras</div>
           {cozinheiras.map(c => (
             <div
               key={c._id}
