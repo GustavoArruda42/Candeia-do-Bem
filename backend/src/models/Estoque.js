@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const ITENS_ESTOQUE = [
   'aguas', 'bananadasGarfos', 'garfos',
   'sabonete', 'pastaDente', 'escovaDente', 'absorvente', 'papelHigienico',
-  'racaoCachorro', 'racaoGato'
+  'racaoCachorro', 'racaoGato', 'kitHigiene'
 ];
 
 const estoqueSchema = new mongoose.Schema({

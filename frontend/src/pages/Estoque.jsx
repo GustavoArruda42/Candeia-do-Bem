@@ -15,6 +15,7 @@ const ROTULOS = {
   papelHigienico:  { label: 'Papel higiênico',    emoji: '🧻' },
   racaoCachorro:   { label: 'Ração Cachorro',     emoji: '🐶' },
   racaoGato:       { label: 'Ração Gato',         emoji: '🐱' },
+  kitHigiene:      { label: 'Kit Higiene',        emoji: '🧴' },
 };
 
 export default function Estoque() {

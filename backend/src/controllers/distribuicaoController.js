@@ -12,6 +12,7 @@ const calcularConsumoEstoque = (dados) => {
     garfos: dados.qtdBananadasGarfos || 0,
     racaoCachorro: dados.racaoCachorro || 0,
     racaoGato: dados.racaoGato || 0,
+    kitHigiene: dados.kitHigiene ? (dados.qtdKitHigiene || 0) : 0,
   };
 
   if (dados.kitHigiene && dados.qtdKitHigiene > 0) {
