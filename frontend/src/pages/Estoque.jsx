@@ -16,6 +16,8 @@ const ROTULOS = {
   racaoCachorro:   { label: 'Ração Cachorro',     emoji: '🐶' },
   racaoGato:       { label: 'Ração Gato',         emoji: '🐱' },
   kitHigiene:      { label: 'Kit Higiene',        emoji: '🧴' },
+  saquinhos:       { label: 'Saquinhos', emoji: '🛍️' },
+  bananadas:       { label: 'Bananadas', emoji: '🍌' },
 };
 
 export default function Estoque() {
